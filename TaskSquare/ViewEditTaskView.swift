@@ -62,7 +62,7 @@ struct ViewEditTaskView: View {
                     deleteTask()
                 }
             } message: {
-                Text("Are you sure you want to delete \"\(task.title)\"?")
+                Text("Are you sure you want to delete \"\(title.trimmingCharacters(in: .whitespaces))\"?")
             }
         }
     }
