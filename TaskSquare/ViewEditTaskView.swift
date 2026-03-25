@@ -11,6 +11,7 @@ struct ViewEditTaskView: View {
     @State private var detail: String
     @State private var isCompleted: Bool
     @State private var showingDeleteConfirmation = false
+    @State private var saveError: Error?
 
     init(task: Task) {
         self.task = task
@@ -64,6 +65,14 @@ struct ViewEditTaskView: View {
             } message: {
                 Text("Are you sure you want to delete \"\(title.trimmingCharacters(in: .whitespaces))\"?")
             }
+            .alert("Save Failed", isPresented: Binding(
+                get: { saveError != nil },
+                set: { if !$0 { saveError = nil } }
+            )) {
+                Button("OK", role: .cancel) { saveError = nil }
+            } message: {
+                Text(saveError?.localizedDescription ?? "")
+            }
         }
     }
 
@@ -71,8 +80,12 @@ struct ViewEditTaskView: View {
         task.title = title.trimmingCharacters(in: .whitespaces)
         task.detail = detail.trimmingCharacters(in: .whitespaces)
         task.isCompleted = isCompleted
-        try? modelContext.save()
-        dismiss()
+        do {
+            try modelContext.save()
+            dismiss()
+        } catch {
+            saveError = error
+        }
     }
 
     private func deleteTask() {
